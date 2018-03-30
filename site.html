@@ -1,5 +1,7 @@
-<div><h4>{{$ctrl.data2016[0].Id}}</h4></div>
-<div class="graph" style="width:{{$ctrl.w}}px; height:{{$ctrl.h}}px;" > 
+<div><h5>Census Block Group: </h5><h4>{{$ctrl.data2016[0].Id}}</h4></div>
+<div><h5>Attribute: </h5><h4>% {{$ctrl.yAxis}}</h4></div>
+<div class="site">
+<!--  style="width:{{$ctrl.w}}px; height:{{$ctrl.h}}px;" > 
     
     <div class="y" style="width:{{$ctrl.h}}px;">{{$ctrl.yAxis}}</div>
     
@@ -7,7 +9,7 @@
       <svg height="{{$ctrl.h}}" width="100%">
       <line class="line{{$index}}" ng-repeat="point in $ctrl.points" x1="{{$ctrl.w / $ctrl.maxX * $index }}" y1="{{$ctrl.points[$index - 1].yValue / $ctrl.maxY * $ctrl.h}}" x2="{{$ctrl.w / $ctrl.maxX * ($index + 1)}}" y2="{{point.yValue / $ctrl.maxY * $ctrl.h}}" />
     </svg>
-     <div class="dot dot{{$index}}" ng-repeat="point in $ctrl.points" style="bottom:calc({{point.yValue}}/{{$ctrl.maxY}}*{{$ctrl.h}}px - 5px); left:calc({{point.xValue}}/{{$ctrl.maxX}}*{{$ctrl.w}}px - 5px);" data-title="{{point.label}}: {{point.yValue}}">{{point.yValue | number:2}}%</div>
+     <div class="dot dot{{$index}}" ng-repeat="point in $ctrl.points" style="bottom:calc({{point.yValue}}/{{$ctrl.maxY}}*{{$ctrl.h}}px - 5px); left:calc({{point.xValue}}/{{$ctrl.maxX}}*{{$ctrl.w}}px - 5px);" data-title="{{point.label}}: {{point.yValue}}">{{point.yValue | number:2}}%</div> -->
   	
   </div>
 

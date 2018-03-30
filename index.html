@@ -13,19 +13,17 @@
      
       <link rel="stylesheet" href="css/bootstrap.css">
       <link rel="stylesheet" href="css/leaflet.css">
-      <link rel="stylesheet" href="css/sitewide.css">
-      <link rel="stylesheet" href="css/style.css">
+      <link rel="stylesheet" href="../ericnost.github.io/css/sitewide.css">
+      <link rel="stylesheet" href="../ericnost.github.io/css/style.css">
 
       <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
        <script type="text/javascript" src="lib/bootstrap.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.js"></script>
       <script type="text/javascript" src="lib/d3.js" charset="utf-8"></script>
-      <script type="text/javascript" src="lib/topojson.v1.min.js"></script>
-      <script type="text/javascript" src="lib/tip.js"></script>
       <script type="text/javascript" src="lib/leaflet.js"></script>
       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.js"></script>
       <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
-
+       <script type="text/javascript" src="lib/topojson.v1.min.js"></script>
 
       <!--  <script type="text/javascript" src="lib/router.js"></script>-->
        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/1.0.0-beta.3/angular-ui-router.js"></script> 
@@ -33,35 +31,22 @@
        <script type="text/javascript" src="lib/ui-leaflet.js"></script>
         <script type="text/javascript" src="lib/log.js"></script>
         <script src='lib/nprogress.js'></script>
-  <link rel='stylesheet' href='css/nprogress.css'/>
+   <link rel='stylesheet' href='css/nprogress.css'/>
+    <script src="lib/w3HTMLinclude.js"></script>
 
 
 </head>
 
   <body ng-app="demoapp">
-    <nav class="navbar navbar-default navbar-fixed-top main-navbar"> <!--creates navbar-->
-            <div class="navbar-header"> <!--creates the navbar header-->
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span><!--used for screen readers for accessibility-->
-                    <span class="glyphicon glyphicon-menu-hamburger"></span>
-                    <span class="menu">Menu</span>
-                </button> <!--hamburger button for smaller devices-->
-                <a class="navbar-brand" href="#">New Orleans Short-Term Rental Viewer</a><!--our website brand name-->
-            </div><!-- 
-            <h5 class="navbar-text"><font color="#cccccc">New Orleans Census Viewer</font></h5> -->
-            <div id="navbar" class="collapse navbar-collapse"><!--links in navbar-->
-                <ul class="nav navbar-nav navbar-right"><!--unordered list for links on navbar-->
 
-                   <!--  <li><a href="AboutUs.html">About</a></li> -->
-                </ul>
-            </div><!--end navbar=collapse-->
+<div w3-include-html="../ericnost.github.io/nav.html"></div>
+<script>
+w3IncludeHTML();
+</script>
 
-    </nav><!--end navigation bar-->
-  <div class="center">
 
-  </div>
 <div class="col-md-12 container" id="main">
-<ui-view></ui-view>
+  <ui-view></ui-view>
 </div>
 
 
@@ -129,7 +114,6 @@ app.factory('Resource', function ($http) {
     },
     getSTR: function(){
     	return $http.get('data//str/str3-18.json').then(function(respSTR) {
-    		console.log(respSTR)
     		return respSTR.data.filter(function(d){return d['Current Status'] == "Issued"})
     	})
     },
@@ -153,7 +137,7 @@ app.factory('Resource', function ($http) {
 	          //d.properties.data.fill = choropleth(d) //bind color changing event somewhere
 			      })
 
-	          	geo = geo.filter(function(d){return d.properties.censusData["2014"] && d.properties.censusData["2000"] && d.properties.censusData["2010"]&& d.properties.censusData["2015"] && d.properties.censusData["2016"]})
+	          	geo = geo.filter(function(d){return d.properties.censusData["2016"]}) //d.properties.censusData["2014"] && d.properties.censusData["2000"] && d.properties.censusData["2010"]&& d.properties.censusData["2015"] && 
 
 	        	return geo;
 	        })
@@ -166,9 +150,9 @@ app.factory('Resource', function ($http) {
           console.log(site)
           var data = resp.data.filter(function(d){return d.Year == year})
           data = data.filter(function(d){return d.Id == site})
-          racedata=data
-          data=resp3.data
-          return data, racedata;
+          //racedata=data
+          //data=resp3.data
+          return data//, racedata;
         })
       });
     }
@@ -176,31 +160,6 @@ app.factory('Resource', function ($http) {
   return service;
 })
 
-app.filter('greaterThan', function () {
-    //our function will need three arguments 
-    return function(items, expressed, filters, year) { 
-      //console.log(items, sift, expressed, filters)
-      var allItems=[];
-      console.log(filters, expressed)
-        //for (i=0; i<filters.length; i++){
-          //find neighborhoods higher than this
-          filters.forEach(function(obj){
-            var temp = items.filter(function(item){
-            //if item price is included between the two boundaries we return true
-            return item.properties.censusData[year][expressed]/item.properties.censusData[year]["Total"] > obj.base && item.properties.censusData[year][expressed]/item.properties.censusData[year]["Total"] < obj.max
-            
-              
-            });
-            temp.forEach(function(t){
-              allItems.push(t)
-            })
-          })
-        
-        //then we return the filtered items array
-        console.log(allItems)
-        return allItems
-    };
-});
 app.filter('percentage', ['$filter', function ($filter) {
   return function (input, decimals) {
     return $filter('number')(input * 100, decimals) + '%';
@@ -213,11 +172,24 @@ app.component('home', {
      NProgress.start()
 
     this.radioModelYear = "2016"
-    this.radioModelOverlay="None"
-    this.radioModelSTR = "None"
-    this.activeMarker = "None"
     var year ="2016"
-   
+    this.radioModelOverlay="None"
+    
+    var rentals = this.str
+    this.maxGuests = d3.max(rentals.map(function(d){return d["Guest Occupancy Limit"]}))
+    this.filterValue = d3.max(rentals.map(function(d){return d["Guest Occupancy Limit"]}))
+    this.radioModelSTR = "None"
+
+    this.activeMarker = "None"
+    var expressed = "None"
+    var go = ""
+    this.radioModelExpressed="None"
+    
+    this.strCount = 0
+    this.blockGroupCount = 0
+
+    this.currentFeature
+    
     this.checkResults = {0:true, 1:true, 2:true, 3:true, 4: true}
     
     this.update = function (sift) {
@@ -234,41 +206,17 @@ app.component('home', {
           filters.push({"base": this.quants[j], "max": plusOne})
         }
        }
-      //this.geojson.data = this.geography //.filter(function(d){return d.properties.censusData[yr]}) //need to reset data to this year?geo.filter(function(d){return d.properties.censusData["2014"]})
-      //console.log(this.geojson.data)
 
-      this.geojson.data = $filter('greaterThan')(this.geography, expressed, filters, this.radioModelYear); //pipe to filter
-
-      
-    //NProgress.done()
     };
 
-    //bind data
-    var expressed = "None"
-    this.radioModelExpressed="None"
-    var rentals = this.str//.filter(function(d){return d['Current Status'] == "Issued"})
-    /*var temp = this.geography.filter(function(d){return d.properties.censusData[year]})
-    var rentals = this.str.filter(function(d){return d['Current Status'] == "Issued"})
-    domArray = temp.map(function(d){var value = d.properties.censusData[year][expressed]/d.properties.censusData[year]["Total"]; return value})*/
   	var scheme = {"White": ['#edf8e9','#bae4b3','#74c476','#31a354','#006d2c'], "Black or African American": ['#eff3ff','#bdd7e7','#6baed6','#3182bd','#08519c'], "American Indian or Alaska Native": ['#feedde','#fdbe85','#fd8d3c','#e6550d','#a63603'], "Asian": ['#f2f0f7','#cbc9e2','#9e9ac8','#756bb1','#54278f'], "Native Hawaiian and Other Pacific Islander": ['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15'], "Hispanic": ['#f7f7f7','#cccccc','#969696','#636363','#252525']}
     var textColor = ["#000000", "#333333", "#e5e5e5", "#e5e5e5", "#e5e5e5"]
 	  var range, color, value, opacity
 	  
-	 
-	  /*var color = d3.scale.quantile() //designate quantile scale generator
-	    .range(range)
-	  d3.mean(domArray) > .3 ? color.domain(domArray) : color.domain([d3.min(domArray), d3.max(domArray)]);
-	  angular.extend(this, {quants: color.copy().quantiles(),expressed: expressed, ranger: {fill:range, text:textColor}})
-  
-  //console.log(domArray)
-    this.quants.splice(0,0,0)*/
+
 
 
     function style(d){
-      //get data value
-      //var value = d.properties.censusData ? color(d.properties.censusData[year][expressed]/d.properties.censusData[year]["Total"]) : "#ddd";
-      //var opacity =  d.properties.censusData ? .7 : 0;
-      //console.log(d, expressed, value)
       return {
                     fillColor: 'white',
                     weight: 0,
@@ -277,18 +225,15 @@ app.component('home', {
                     dashArray: '0',
                     fillOpacity: 0
                 }
-
     };
-
 
      var layers = [];
 
-
     this.reExpress = function (){ 
-    
-                  //NProgress.start()
-      //console.log(att)
+
       expressed = this.radioModelExpressed
+
+       window.location = "#/"+go+"/"+expressed
 
       if (expressed == "None"){
         layers.forEach(function(d){
@@ -340,6 +285,8 @@ app.component('home', {
           })
         })
 
+      this.blockGroupCount = allItems.length
+
        layers.forEach(function(d){
        	var value = d.feature.properties.censusData[year] ? color(d.feature.properties.censusData[year][expressed]/d.feature.properties.censusData[year]["Total"]) : "#ddd";
        	
@@ -382,6 +329,7 @@ app.component('home', {
   				var radius = (l.feature.properties.incData[clicked]/factor) * scale //30 will be largest circle size
   				var message = l.feature.properties.incData[clicked].toString()
   				var measure =  (clicked == "with other types of income" || clicked == "with public assistance income") ? "percent" : "dollars"
+          //var max = l.feature.properties.incData[clicked]
   	    		obj[l.feature.properties.AFFGEOID] = {
   	    			lat: latLng.lat,
   	    			lng: latLng.lng,
@@ -407,16 +355,19 @@ app.component('home', {
         this.radioModelSTR = "None"
         var exp = this.radioModelExpressed
     		var clicked = this.radioModelOverlay
-    		if (clicked != "None"){
-    			angular.extend(this, {
-                    markers: makeMark(clicked, exp)//function that calls point to layer on layers
-                });
-    		}           
+        if (clicked != "None"){
+      		angular.extend(this, {
+                      markers: makeMark(clicked, exp), //function that calls point to layer on layers
+                     
+                  });
+          angular.extend(this.legend,{
+            main: makeLegend()
+          }) 
+        }    
     };
 
     this.doMarkersRexpress = function() {
         //this.markers = {}
-
         var exp = this.radioModelExpressed
         var clicked = this.radioModelOverlay
         if (clicked != "None"){
@@ -426,12 +377,15 @@ app.component('home', {
         }           
     };
 
-    function makeSTRMark (clicked, exp){
+    function makeSTRMark (clicked, exp, guestsFilter){
       NProgress.start()
-    	var obj ={}
+    	  var obj ={}
       	var temp = clicked == "All" ? rentals : rentals.filter(function(d){return d["License Type"] == clicked})
+        temp = temp.filter(function(d){return d['Guest Occupancy Limit'] <= guestsFilter})
+
         var points = temp.map(function(c){return [c.Y, c.X]})
         points = turf.points(points)
+       
         var thisOpacity={}
         layers.forEach(function(l){
           searchWithin = turf.polygon(l.feature.geometry.coordinates)
@@ -439,11 +393,11 @@ app.component('home', {
           if (features.length > 0){
             features.forEach(function(a){
               var key = "a"+a.geometry.coordinates[1].toString().slice(3,12)
+              
               if (l.options.fillOpacity > 0|| exp == "None"){thisOpacity[key] = .4}else{thisOpacity[key] = 0}
             })
           }
         })
-        console.log(thisOpacity)
       	temp.forEach(function(d){
             //find what layer this is in, check its opacity.
       			var message = "Address: "+d.Address+"<br>Guest limit: "+d["Guest Occupancy Limit"]+"<br><a href='"+d.Link+"' target='_blank''>Link to permit</a><br>"
@@ -472,20 +426,35 @@ app.component('home', {
         this.activeMarker = "str"
         var exp = this.radioModelExpressed
     		var clicked = this.radioModelSTR
+        var guestsFilter = this.filterValue
     		if (clicked != "None"){
     			angular.extend(this, {
-                    markers: makeSTRMark(clicked, exp)//function that calls point to layer on layers
+                    markers: makeSTRMark(clicked, exp, guestsFilter),//function that calls point to layer on layers
+                    
                 });
-    		}       
+          this.strCount = d3.keys(this.markers).length
+    		}
+
     };
 
     this.doSTRRexpress = function() {
         //this.markers = {}
         var exp = this.radioModelExpressed
         var clicked = this.radioModelSTR
-        angular.extend(this, {
-                  markers: makeSTRMark(clicked, exp)//function that calls point to layer on layers
-              });
+        var guestsFilter = this.filterValue
+        var check = this.radioModelOverlay
+        if (check == "None"){
+          angular.extend(this, {
+                    markers: makeSTRMark(clicked, exp, guestsFilter) //function that calls point to layer on layers
+          });
+          var tempnum=0
+          d3.values(this.markers).forEach(function(d){
+            var sum = d.opacity == .4 ? 1 : 0
+            tempnum+=sum
+          })
+          this.strCount=tempnum
+          //this.strCount = d3.keys(this.markers).map(function(d){return d.opacity = .4}).length
+        }
     };
 
     angular.extend(this, {
@@ -495,6 +464,7 @@ app.component('home', {
                 onEachFeature: function(feature, layer){
                   layers.splice(0,0,layer);
                   layer.on("click", function() {
+                    go = feature.properties.AFFGEOID
                     layers.forEach(function(d){
                       d.setStyle({
                         color:'white'
@@ -509,15 +479,23 @@ app.component('home', {
                   
                 }
             },
-        center: {
-            lat: 29.977835,
-            lng: -90,
-            zoom: 12
-        },
-        defaults: {
-            scrollWheelZoom: false
-        }
+            center: {
+                lat: 29.977835,
+                lng: -90,
+                zoom: 12
+            },
+            defaults: {
+                scrollWheelZoom: false
+            }//,legend: {main: makeLegend()}
     });
+    function makeLegend(){
+      var obj = {
+              position: 'bottomleft',
+              colors: ['black'],
+              labels: ["min", 'max']//[ format(min)+"-"+format(range[0]), format(range[0])+"-"+format(range[1]), format(range[1])+"-"+format(max) ].reverse()
+        }
+      return obj
+    }
 
  NProgress.done()
   }
@@ -529,17 +507,75 @@ app.component('site', {
   controller: function () {
     console.log(this)
 
-    //need to handle no data2000...
-
-
-    var expressed = this.expressed//change to dynamic
+    var expressed = this.expressed
+     this.yAxis = expressed;
     var total = "Total"
     //from: https://codepen.io/nickmoreton/pen/ByYZMB
-    this.w = $(".col-md-3").width();
+    this.w = $(".col-md-3").width()+100;
     this.h = 100
-    this.yAxis = '% '+expressed;
-    this.xAxis = ' '+"2000"+'-----'+"2010"+'-----'+"2014"+'-----'+"2015"+'-----'+"2016";
     
+    if (this.data2000.length > 0) {
+          var maxi = 1
+    var mini = 0
+
+    var height = this.h
+    var width = this.w
+    //var barheight = (height/yearskey.length < 15) ? 15:height/yearskey.length //(bar width)
+    var year = d3.select('.site').append("svg").attr("width", width).attr("height", height);
+    
+    var y = d3.scale.linear()
+      .domain([maxi, mini])
+      .range([10, height-10]);
+
+    var x = d3.scale.linear()
+      .domain(["2000", "2016"])
+      .range([20, width-60]);
+    
+    var data = [this.data2000[0][expressed]/this.data2000[0][total],this.data2010[0][expressed]/this.data2010[0][total],this.data2016[0][expressed]/this.data2016[0][total]]
+
+    var line = d3.svg.line()
+        .x(function(d, i) {return x(d); })
+        .y(function(d, i) {return y(data[i]); });
+
+    year.append("path")
+        .datum(["2000", "2010", "2016"])
+        .attr("class", "line")
+      //  .attr("transform", "translate(" + 10+ "," + 0 + ")")
+        .style("stroke", "black")
+        .attr("d", line);
+
+    year.selectAll(".dot")
+      .data(["2000", "2010",  "2016"])
+        .enter().append("circle")
+      .attr("class", "dot")
+     // .attr("transform", "translate(" + 10+ "," + 0 + ")")
+      .attr("cx", line.x())
+      .attr("cy", line.y())
+      .attr("r", 6)
+      .style("fill", "black")
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        //.orient("bottom")
+        .tickValues(["2000", "2010", "2016"])
+        .tickFormat(d3.format(""))
+
+    year.append("g")
+        .attr("class", "axis")
+        .call(xAxis)
+    .selectAll("text")
+      .attr("y", height-10)
+      .attr("x", 0)
+      .style({"text-anchor": "middle", "size": "6px"});
+
+      var format = d3.format(".4r") 
+      year.selectAll("label")
+      .data(["2000", "2010", "2016"])
+      .enter().append("text")
+      .attr("y", line.y())
+      .attr("x", line.x())
+      .attr("transform", "translate(" + 10+ "," + 0 + ")")
+      .text(function(d,i){var text = format((data[i]*100))+"%"; return text})
 
     //accordion
     this.status = {
@@ -549,72 +585,29 @@ app.component('site', {
   	};
   	this.oneAtATime = true;
   	this.groups = [
-    {
-      title: '2000',
-      content: this.data2000
-    },
-    {
-      title: '2010',
-      content: this.data2010
-    },
-    {
-      title: '2014',
-      content: this.data2014
-    },
-    {
-      title: '2015',
-      content: this.data2015
-    },
-    {
-      title: '2016',
-      content: this.data2016
-    }
-
-  ];
-    this.groups.reverse()
-    // Data 
-
-    this.points = [
       {
-      label: '2000',
-      xValue: 1,
-      yValue: (this.data2000[0][expressed]/this.data2000[0][total])*100
+        title: '2000',
+        content: this.data2000
       },
       {
-      label: '2010',
-      xValue: 2,
-      yValue:  (this.data2010[0][expressed]/this.data2010[0][total])*100
+        title: '2010',
+        content: this.data2010
       },
       {
-      label: '2014',
-      xValue: 3,
-      yValue:  (this.data2014[0][expressed]/this.data2014[0][total])*100
+        title: '2014',
+        content: this.data2014
       },
       {
-      label: '2015',
-      xValue: 4,
-      yValue:  (this.data2015[0][expressed]/this.data2015[0][total])*100
+        title: '2015',
+        content: this.data2015
       },
       {
-      label: '2016',
-      xValue: 4,
-      yValue:  (this.data2016[0][expressed]/this.data2016[0][total])*100
+        title: '2016',
+        content: this.data2016
       }
     ];
-    // Find Maximum X & Y Axis Values - this is used to position the points as a percentage of the maximum
-    this.maxY = 0;
-    this.maxX = 0;
-    
-    var arrLength = this.points.length;
-    for (var i = 0; i < arrLength; i++) {
-        // Find Maximum X Axis Value
-      	if (this.points[i].yValue > this.maxY)
-        this.maxY = this.h;
-      	// Find Maximum Y Axis Value
-      	if (this.points[i].xValue > this.maxX)
-        this.maxX = this.points[i].xValue;
-    }
-
+    this.groups.reverse()
+  }
 
   }
 })  

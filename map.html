@@ -1,31 +1,40 @@
 <div class="container-fluid">
 	<div class="col-md-9">
 
-		<leaflet center="$ctrl.center" legend="$ctrl.legend" markers="$ctrl.markers" defaults="$ctrl.defaults" width="100%"  height="480px" geojson="$ctrl.geojson"></leaflet>
-
-<br>Show STRs with issues licenses:
-<div class="btn-group">
-    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelSTR" ng-click="$ctrl.doSTR(value)" ng-repeat="value in ['None', 'Temporary STR', 'Accessory STR', 'Commercial STR' ]" uib-btn-radio="value">{{ value }}</label>
+		<leaflet center="$ctrl.center" legend="$ctrl.legend.main" markers="$ctrl.markers" defaults="$ctrl.defaults" width="100%"  height="480px" geojson="$ctrl.geojson"></leaflet>
+<div class="col-md-2">
+	<br>Select year (demographic data):
+	<div class="btn-group"> 
+	    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelYear" ng-click="$ctrl.reExpress()" ng-repeat="value in ['2016']" uib-btn-radio="value">{{ value }}</label><!-- '2000', '2010', '2014',  -->
+	</div>
 </div>
 
-<br>Select year (demographic data):
-<div class="btn-group"> 
-    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelYear" ng-click="$ctrl.reExpress()" ng-repeat="value in ['2016']" uib-btn-radio="value">{{ value }}</label><!-- '2000', '2010', '2014',  -->
+<div class="col-md-3">
+	<br>Show STRs with issued licenses: <b>{{$ctrl.strCount}}</b>
+	<div class="btn-group">
+	    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelSTR" ng-click="$ctrl.doSTR(value)" ng-repeat="value in ['None', 'Temporary STR', 'Accessory STR', 'Commercial STR' ]" uib-btn-radio="value">{{ value }}</label>
+	</div>
+	<div>
+		<br>Filter by maximum permitted guests: <b>{{$ctrl.filterValue}}</b>
+		<input type="range" name="range" ng-model="$ctrl.filterValue" min="0" max="{{$ctrl.maxGuests}}" ng-change="$ctrl.doSTRRexpress(value,filterValue)">
+	</div>
 </div>
 
-<br>Select a demographic attribute to overlay:
-<div class="btn-group">
-    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelExpressed" ng-click="$ctrl.reExpress()" ng-repeat="value in ['None', 'White',	'Black or African American',	'Hispanic', 'Asian']" uib-btn-radio="value">{{ value }}</label>
-</div>
+<div class="col-md-7">
+	<br>Select a demographic attribute to overlay:
+	<div class="btn-group">
+	    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelExpressed" ng-click="$ctrl.reExpress()" ng-repeat="value in ['None', 'White',	'Black or African American',	'Hispanic', 'Asian']" uib-btn-radio="value">{{ value }}</label>
+	</div>
 
-<br>Filter by quantile:
-<div class="btn-group">
-    <label class="btn"  ng-repeat="(key, value) in $ctrl.quants" ng-model="$ctrl.checkResults[key]; " ng-style="{'background-color': $ctrl.ranger.fill[key], 'color': $ctrl.ranger.text[key]}" ng-click="$ctrl.reExpress();" uib-btn-checkbox>{{ (value*100) |number:2 }}% - {{($ctrl.quants[key+1] *100) | number:2}}%</label>
-</div>
+	<br>Filter by quantile: <b>{{$ctrl.blockGroupCount}}</b> neighborhoods in this selection
+	<div class="btn-group">
+	    <label class="btn"  ng-repeat="(key, value) in $ctrl.quants" ng-model="$ctrl.checkResults[key]; " ng-style="{'background-color': $ctrl.ranger.fill[key], 'color': $ctrl.ranger.text[key]}" ng-click="$ctrl.reExpress();" uib-btn-checkbox>{{ (value*100) |number:2 }}% - {{($ctrl.quants[key+1] *100) | number:2}}%</label>
+	</div>
 
-<br>Overlay income and rent data:
-<div class="btn-group">
-    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelOverlay" ng-click="$ctrl.doMarkers(value)" ng-repeat="value in ['None', 'Median contract rent', 'Median household income']" uib-btn-radio="value">{{ value }}</label>
+	<br>Overlay income and rent data:
+	<div class="btn-group">
+	    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelOverlay" ng-click="$ctrl.doMarkers(value)" ng-repeat="value in ['None', 'Median rent', 'Median household income']" uib-btn-radio="value">{{ value }}</label>
+	</div>
 </div>
 
 </div>
@@ -37,16 +46,18 @@
  </div>
 <div class="col-md-12">
 <br><h4>Context</h4>
-What are short-term rentals?
-<br>See The Lens's map of city data <a href="https://thelensnola.org/new-orleans-airbnb-tracker/" target="_blank">here.</a>
-<br>Data explanation:
-<br>What are the different short-term rental categories the city uses?
+What are short-term rentals? Think Airbnb. 
+<ul><li>See Jane Place's recent report <a href="https://www.documentcloud.org/documents/4421169-Short-Term-Rentals-Long-Term-Impacts-the.html" target="_blank">here.</a></li>
+<li>See The Lens's map of city data <a href="https://thelensnola.org/new-orleans-airbnb-tracker/" target="_blank">here.</a></li>
+</ul>
+<h4>Data explanation</h4>
+What are the different short-term rental categories the city uses?
 <ul><li>Temporary = XXXXX</li>
 	<li>Accessory = XXXXX</li>
 	<li>Commercial = XXXXX</li>
 </ul>
 US Census's American Community Survey
-<br>data.nola.gov - https://data.nola.gov/Housing-Land-Use-and-Blight/Short-Term-Rental-License-Applications/en36-xvxg
-<br><a href="https://github.com/ericnost/NOLA-STR/issues" target="_blank">Report an issue</a>
+<br><a href="https://data.nola.gov/Housing-Land-Use-and-Blight/Short-Term-Rental-License-Applications/en36-xvxg" target="_blank">Data.Nola.Gov</a>
+<br><br><a href="https://github.com/ericnost/NOLA-STR/issues" target="_blank">Report an issue</a>
 </div>
 <!-- buttons here -->
