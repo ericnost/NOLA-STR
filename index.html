@@ -3,7 +3,7 @@
 
 <head>
       <!-- <link href='https://fonts.googleapis.com/css?family=Ruda:400,700|Cantarell:400,700,400italic,700italic' rel='stylesheet' type='text/css'> -->
-      <link href='https://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'>
+      <link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet">
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <meta name="keywords" content="maps,cartography, airbnb, new orleans"/>
@@ -13,8 +13,8 @@
      
       <link rel="stylesheet" href="css/bootstrap.css">
       <link rel="stylesheet" href="css/leaflet.css">
-      <link rel="stylesheet" href="../ericnost.github.io/css/sitewide.css">
-      <link rel="stylesheet" href="../ericnost.github.io/css/style.css">
+      <link rel="stylesheet" href="css/sitewide.css">
+      <link rel="stylesheet" href="../css/style.css">
 
       <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
        <script type="text/javascript" src="lib/bootstrap.min.js"></script>
@@ -39,14 +39,14 @@
 
   <body ng-app="demoapp">
 
-<div w3-include-html="../ericnost.github.io/nav.html"></div>
-<script>
-w3IncludeHTML();
-</script>
-
-
+	<div class="brand col-md-12">
+		<div class="col-md-4 pull-right">
+			<h1><em><b>ERIC NOST</b> </em><img src="photo.png" height="50px"/></h1>
+		</div>
+		
+	</div>
 <div class="col-md-12 container" id="main">
-  <ui-view></ui-view>
+  <h3>Short-term Rentals in New Orleans</h3><ui-view></ui-view>
 </div>
 
 
@@ -147,7 +147,6 @@ app.factory('Resource', function ($http) {
     getSite: function(site, year) { //this instead should filter geography, above, to return right id
       return $http.get('data/race/data.json').then(function(resp) {
         return $http.get('data/income/data.json').then(function(resp3) {
-          console.log(site)
           var data = resp.data.filter(function(d){return d.Year == year})
           data = data.filter(function(d){return d.Id == site})
           //racedata=data
@@ -160,11 +159,6 @@ app.factory('Resource', function ($http) {
   return service;
 })
 
-app.filter('percentage', ['$filter', function ($filter) {
-  return function (input, decimals) {
-    return $filter('number')(input * 100, decimals) + '%';
-  };
-}]);
 app.component('home', {
   bindings: { geography: '<', str: '<'}, //make the data we loaded into the view from the factory available to this component
   templateUrl: 'map.html', //this is the html that we will plug our data into
@@ -174,7 +168,15 @@ app.component('home', {
     this.radioModelYear = "2016"
     var year ="2016"
     this.radioModelOverlay="None"
-    
+   
+   var dump = this.geography
+    this.filterOverlayValue={}
+    this.filterOverlayValue["Median household income"] = d3.max(dump.map(function(d){return d.properties.incData["Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)"]}))
+    this.maxOverlay={}
+    this.maxOverlay["Median household income"] = d3.max(dump.map(function(d){return d.properties.incData["Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)"]}))
+    this.filterOverlayValue["Median rent"] = d3.max(dump.map(function(d){return d.properties.incData["Median contract rent 2016"]}))
+    this.maxOverlay["Median rent"] = d3.max(dump.map(function(d){return d.properties.incData["Median contract rent 2016"]}))
+
     var rentals = this.str
     this.maxGuests = d3.max(rentals.map(function(d){return d["Guest Occupancy Limit"]}))
     this.filterValue = d3.max(rentals.map(function(d){return d["Guest Occupancy Limit"]}))
@@ -186,17 +188,18 @@ app.component('home', {
     this.radioModelExpressed="None"
     
     this.strCount = 0
+    this.strTotal = 0
+    this.percent = 0
     this.blockGroupCount = 0
 
     this.currentFeature
     
     this.checkResults = {0:true, 1:true, 2:true, 3:true, 4: true}
+
+    this.showFilter = {"str": false, "exp": false, "rentinc": false}
     
     this.update = function (sift) {
-     //NProgress.start()
-        //console.log(sift)
         var yr = this.radioModelYear
-        console.log(yr)
        var pos = this.quants.indexOf(sift)
        var values = d3.values(this.checkResults)
        var filters = []
@@ -213,9 +216,6 @@ app.component('home', {
     var textColor = ["#000000", "#333333", "#e5e5e5", "#e5e5e5", "#e5e5e5"]
 	  var range, color, value, opacity
 	  
-
-
-
     function style(d){
       return {
                     fillColor: 'white',
@@ -236,6 +236,7 @@ app.component('home', {
        window.location = "#/"+go+"/"+expressed
 
       if (expressed == "None"){
+        this.showFilter.exp = false
         layers.forEach(function(d){
           d.setStyle({  
                 fillColor: 'white',
@@ -247,6 +248,7 @@ app.component('home', {
               });
         })
       }  else{
+        this.showFilter.exp = true
         var year = this.radioModelYear
         var temp = this.geography.filter(function(d){return d.properties.censusData[year]})
         domArray = temp.map(function(d){var value = d.properties.censusData[year][expressed]/d.properties.censusData[year]["Total"]; return value})
@@ -302,8 +304,9 @@ app.component('home', {
                       fillOpacity: opacity
                       });
         })
-       if (this.activeMarker == "str"){this.doSTRRexpress()}
-      if (this.activeMarker == "overlays"){this.doMarkersRexpress()}
+      this.radios()
+      // if (this.activeMarker == "str"){this.doSTRRexpress()}
+      //if (this.activeMarker == "overlays"){this.doMarkersRexpress()}
 
       }
     //NProgress.done()
@@ -313,149 +316,111 @@ app.component('home', {
     angular.extend(this, {
     	markers: null
     })
+        
+        this.radios = function(clicked){
+          this.markers = {}
 
-    function makeMark (clicked, exp){
-    	var obj ={}
-      var clicked = (clicked == "Median household income") ? "Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)" : "Median contract rent 2016"
-    	layers.forEach(function(l){
-        var thisOpacity
-        if (l.options.fillOpacity > 0|| exp == "None"){thisOpacity = .4}else{thisOpacity = 0}
-    		if (l.feature.properties.incData){
-	    		var bounds = l.getBounds();
-  				var latLng = bounds.getCenter();
-  				var factor = (clicked == "with other types of income" || clicked == "with public assistance income") ? l.feature.properties.incData.total : 1
-  				var scale = (clicked == "with other types of income" || clicked == "with public assistance income") ? 100 : .02
-  				scale = clicked == "Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)" ? .0003 : scale 
-  				var radius = (l.feature.properties.incData[clicked]/factor) * scale //30 will be largest circle size
-  				var message = l.feature.properties.incData[clicked].toString()
-  				var measure =  (clicked == "with other types of income" || clicked == "with public assistance income") ? "percent" : "dollars"
-          //var max = l.feature.properties.incData[clicked]
-  	    		obj[l.feature.properties.AFFGEOID] = {
-  	    			lat: latLng.lat,
-  	    			lng: latLng.lng,
-              opacity: thisOpacity,
-  	    			focus: false,
-  	                message: message+" "+measure,
-  	    			icon:{
-  	    				type:'div',
-  	    				iconSize: [radius, radius],
-  	    				className: 'circle'
-  	    			}
-  	    		}
-    		}
+          var exp = this.radioModelExpressed
+          var overlay = this.radioModelOverlay
+          var str = this.radioModelSTR
 
-    	})
-       return obj
+          var guestsFilter = this.filterValue
+          var rentIncFilter = this.filterOverlayValue[overlay]
 
-    }
+          this.showFilter.str = str == "None" ? false : true
+          this.showFilter.rentinc = overlay == "None" ? false : true
 
-    this.doMarkers = function() {
-        //this.markers = {}
-        this.activeMarker = "overlays"
-        this.radioModelSTR = "None"
-        var exp = this.radioModelExpressed
-    		var clicked = this.radioModelOverlay
-        if (clicked != "None"){
-      		angular.extend(this, {
-                      markers: makeMark(clicked, exp), //function that calls point to layer on layers
-                     
-                  });
-          angular.extend(this.legend,{
-            main: makeLegend()
-          }) 
-        }    
-    };
-
-    this.doMarkersRexpress = function() {
-        //this.markers = {}
-        var exp = this.radioModelExpressed
-        var clicked = this.radioModelOverlay
-        if (clicked != "None"){
+          var temp = rentals.filter(function(d){return d["License Type"] == str}) //clicked == "All" ? rentals : 
+          this.strTotal = temp.length
+          temp = temp.filter(function(d){return d['Guest Occupancy Limit'] <= guestsFilter})
+          
           angular.extend(this, {
-                    markers: makeMark(clicked, exp)//function that calls point to layer on layers
+                    markers: makersMark(clicked, exp, overlay, str, guestsFilter, rentIncFilter,temp)//function that calls point to layer on layers
                 });
-        }           
-    };
-
-    function makeSTRMark (clicked, exp, guestsFilter){
-      NProgress.start()
-    	  var obj ={}
-      	var temp = clicked == "All" ? rentals : rentals.filter(function(d){return d["License Type"] == clicked})
-        temp = temp.filter(function(d){return d['Guest Occupancy Limit'] <= guestsFilter})
-
-        var points = temp.map(function(c){return [c.Y, c.X]})
-        points = turf.points(points)
-       
-        var thisOpacity={}
-        layers.forEach(function(l){
-          searchWithin = turf.polygon(l.feature.geometry.coordinates)
-          var features = turf.pointsWithinPolygon(points, searchWithin).features
-          if (features.length > 0){
-            features.forEach(function(a){
-              var key = "a"+a.geometry.coordinates[1].toString().slice(3,12)
-              
-              if (l.options.fillOpacity > 0|| exp == "None"){thisOpacity[key] = .4}else{thisOpacity[key] = 0}
-            })
-          }
-        })
-      	temp.forEach(function(d){
-            //find what layer this is in, check its opacity.
-      			var message = "Address: "+d.Address+"<br>Guest limit: "+d["Guest Occupancy Limit"]+"<br><a href='"+d.Link+"' target='_blank''>Link to permit</a><br>"
-              var key = "a"+d.X.toString().slice(3,12)
-      		    obj[key] = {
-    	    			lat: d.X,
-    	    			lng: d.Y,
-                opacity: thisOpacity[key],
-    	    			focus: false,
-    	                message: message,
-    	    			icon:{
-    	    				type:'div',
-    	    				iconSize: [4, 4],
-    	    				className: 'circle',
-	    			}
-	    		}
-      	})
-        NProgress.done()
-       return obj
-
-    }
-
-    this.doSTR = function() {
-        //this.markers = {}
-        this.radioModelOverlay="None"
-        this.activeMarker = "str"
-        var exp = this.radioModelExpressed
-    		var clicked = this.radioModelSTR
-        var guestsFilter = this.filterValue
-    		if (clicked != "None"){
-    			angular.extend(this, {
-                    markers: makeSTRMark(clicked, exp, guestsFilter),//function that calls point to layer on layers
-                    
-                });
-          this.strCount = d3.keys(this.markers).length
-    		}
-
-    };
-
-    this.doSTRRexpress = function() {
-        //this.markers = {}
-        var exp = this.radioModelExpressed
-        var clicked = this.radioModelSTR
-        var guestsFilter = this.filterValue
-        var check = this.radioModelOverlay
-        if (check == "None"){
-          angular.extend(this, {
-                    markers: makeSTRMark(clicked, exp, guestsFilter) //function that calls point to layer on layers
-          });
-          var tempnum=0
-          d3.values(this.markers).forEach(function(d){
-            var sum = d.opacity == .4 ? 1 : 0
-            tempnum+=sum
-          })
-          this.strCount=tempnum
-          //this.strCount = d3.keys(this.markers).map(function(d){return d.opacity = .4}).length
+         
+          var dump = d3.values(this.markers).filter(function(d){return d.type == "str" && d.opacity == .4})
+          this.strCount=dump.length
+          var format = d3.format(".4r")
+          this.percent = format((this.strCount/this.strTotal)*100)
         }
-    };
+
+
+        function makersMark (clicked, exp, overlay, str, guestsFilter, rentIncFilter,temp){
+            var obj ={}
+
+            var points = temp.map(function(c){return [c.Y, c.X]})
+            points = turf.points(points)
+
+            var thisOpacity
+
+            function makeid() {
+              var text = "";
+              var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+              for (var i = 0; i < 5; i++)
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+              return text;
+            } //https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+
+            layers.forEach(function(l){
+              var overlayCheck = (overlay == "Median household income") ? "Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)" : "Median contract rent 2016"
+              if (overlay != "None" && l.feature.properties.incData[overlayCheck]<= rentIncFilter){
+
+                if (l.options.fillOpacity > 0|| exp == "None"){thisOpacity = .4}else{thisOpacity = 0} //set marker opacity based on demo expression
+                var bounds = l.getBounds();
+                var latLng = bounds.getCenter();
+                var scale = overlayCheck == "Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)" ? .0003 : .025 
+                var radius = l.feature.properties.incData[overlayCheck] * scale //30 will be largest circle size
+                var message = l.feature.properties.incData[overlayCheck].toString()
+                var measure =  "dollars" //(clicked == "with other types of income" || clicked == "with public assistance income") ? "percent" :
+                //var max = l.feature.properties.incData[clicked]
+                  obj[l.feature.properties.AFFGEOID] = {
+                    lat: latLng.lat,
+                    lng: latLng.lng,
+                    opacity: thisOpacity,
+                    focus: false,
+                    message: message+" "+measure,
+                    icon:{
+                      type:'div',
+                      iconSize: [radius, radius],
+                      className: 'circle'
+                    }
+                  }
+                }
+                
+                if (str != "None"){
+                    var searchWithin = turf.polygon(l.feature.geometry.coordinates)
+                    var features = turf.pointsWithinPolygon(points, searchWithin).features //what points are in this polygon/block group?
+                
+                    if (features.length > 0){
+                      features.forEach(function(d){
+                        var hash = makeid()
+                        var key = "a"+d.geometry.coordinates[1].toString().slice(3,14)+hash
+
+                        if (l.options.fillOpacity > 0 || exp == "None"){thisOpacity = .4}else{thisOpacity = 0}
+                        //var message = "Address: "+d.Address+"<br>Guest limit: "+d["Guest Occupancy Limit"]+"<br><a href='"+d.Link+"' target='_blank''>Link to permit</a><br>"
+                        //var target = "a"+d.X.toString().slice(3,12)
+                        obj[key] = {
+                          lat: d.geometry.coordinates[1],
+                          lng: d.geometry.coordinates[0],
+                          opacity: thisOpacity,
+                          focus: false,
+                          type:"str",
+                          //message: "default",
+                          icon:{
+                            type:'div',
+                            iconSize: [4, 4],
+                            className: 'circle',
+                            }   
+                        }
+                      })
+                    }
+                }
+            })
+            return obj
+
+    }
 
     angular.extend(this, {
             geojson: {
@@ -505,13 +470,12 @@ app.component('site', {
   bindings: { data2014: '<', data2015: '<', data2016: '<', data2000: '<', data2010: '<', expressed: '<'}, //make the data we loaded into the view from the factory available to this component
   templateUrl: 'site.html', //this is the html that we will plug our data into
   controller: function () {
-    console.log(this)
 
     var expressed = this.expressed
      this.yAxis = expressed;
     var total = "Total"
     //from: https://codepen.io/nickmoreton/pen/ByYZMB
-    this.w = $(".col-md-3").width()+100;
+    this.w = ($(".col-md-4").width()/2)+100;
     this.h = 100
     
     if (this.data2000.length > 0) {
