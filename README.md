@@ -20,5 +20,5 @@ What are quintiles?
 - Quintiles organize data into five equal-count categories. If our data contains 100 Census block groups, then each quintile represents 20 Census block groups. This facilitates comparison across variables: we can ask, for instance, where are the top 20% of black neighborhoods? Where are the top 20% of white neighborhoods?
 
 Data sources
--Demographic information (reported race and ethnicity) and rent and income data come from the US Census's American Community Survey (2016 5-year)
--STR licenses can be searched and downloaded here: Data.Nola.Gov
+- Demographic information (reported race and ethnicity) and rent and income data come from the US Census's American Community Survey (2016 5-year)
+- STR licenses can be searched and downloaded here: Data.Nola.Gov
