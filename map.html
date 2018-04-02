@@ -8,6 +8,7 @@
 	<div class="btn-group">
 	    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelSTR" ng-click="$ctrl.radios(value)" ng-repeat="value in ['None', 'Temporary STR', 'Accessory STR', 'Commercial STR' ]" uib-btn-radio="value">{{ value }}</label>
 	</div>
+	What do these mean? See "Data Explanation" below.
 	<div ng-show="$ctrl.showFilter.str">
 		<br>Filter by maximum permitted guests: <b>{{$ctrl.filterValue}}</b> or fewer
 		<input type="range" name="range" ng-model="$ctrl.filterValue" min="0" max="{{$ctrl.maxGuests}}" ng-change="$ctrl.radios(value,filterValue)">
@@ -15,7 +16,7 @@
 </div>
 
 <div class="col-md-8">
-	<br>Select year (demographic data):
+	<br>Select year (socio-economic data):
 	<div class="btn-group"> 
 	    <label type="button" class="btn btn-primary padright" ng-model="$ctrl.radioModelYear" ng-click="$ctrl.reExpress()" ng-repeat="value in ['2016']" uib-btn-radio="value">{{ value }}</label><!-- '2000', '2010', '2014',  -->
 	</div>
@@ -52,22 +53,23 @@
 <div class="col-md-12">
 <br><h4>What are short-term rentals?</h4>
 This is a map of short-term rentals (STR) that have been issued permits from the City of New Orleans, permits which were active as of March 20th, 2018. STRs involve an apartment or house's long-term renter, owner, or property manager "hosting" guests. Airbnb is the most well-known website for listing and booking such rentals. While Airbnb claims that STR can help renters and owners make ends meet, affordable housing adovcates have raised concerns that STR leads to rent increases and displacement.
-<ul><li>Jane Place, a New Orleans organization working for housing justice, recently released a report on the impacts of the City's short-term rentals. See the report <a href="https://www.documentcloud.org/documents/4421169-Short-Term-Rentals-Long-Term-Impacts-the.html" target="_blank">here.</a> Some of the key findings: the vast majority of STR are whole-home rentals, that some neighborhoods are more burdened by STRs than others, that the market has consolidated into the hands of fewer operators, and that long-term housing market prices have increased.</li>
-<li>The Lens has also mapped of city data <a href="https://thelensnola.org/new-orleans-airbnb-tracker/" target="_blank">here.</a></li>
+<ul><li>Jane Place, a New Orleans organization working for housing justice, recently released a report on the impacts of short-term rentals on the city. See the report <a href="https://www.documentcloud.org/documents/4421169-Short-Term-Rentals-Long-Term-Impacts-the.html" target="_blank">here.</a> Some of the key findings: the vast majority of STR are whole-home rentals; some neighborhoods are more burdened by STRs than others; the STR market has consolidated into the hands of fewer operators; long-term housing market prices have increased.</li>
+<li>The Lens has also mapped the City's STR data <a href="https://thelensnola.org/new-orleans-airbnb-tracker/" target="_blank">here.</a></li>
 </ul>
 <h4>Data explanation</h4>
 What are the different short-term rental categories the city uses? In general, see the city's guide<a href="https://www.nola.gov/nola/media/One-Stop-Shop/Safety%20and%20Permits/STR-Brochure-G.pdf" target="_blank"> here</a>.
-<ul><li>Temporary = The owner must occupy the home and be present during bookings. Up to 3 bedrooms and 6 guests may be booked. Long-term renters cannot "sublet" short-term through this category. Not allowed in the French Quarter. </li>
-	<li>Accessory = The owner or long-term renter can rent out an entire home or apartment - up to 5 bedrooms and 10 guests. Cannot be booked for more than 90 nights a year. Not allowed in the French Quarter. </li>
-	<li>Commercial = Owners in non-residential neighborhoods can rent part of or an entire dwelling. Allowed in parts of the French Quarter.</li>
+<ul><li>Temporary - The owner must occupy the home and be present during bookings. Up to 3 bedrooms and 6 guests may be booked. Long-term renters cannot "sublet" short-term through this category. Not allowed in the French Quarter. </li>
+	<li>Accessory - The owner or long-term renter can rent out an entire home or apartment - up to 5 bedrooms and 10 guests. Cannot be booked for more than 90 nights a year. Not allowed in the French Quarter. </li>
+	<li>Commercial - Owners in non-residential neighborhoods can rent part of or an entire dwelling. Allowed in parts of the French Quarter.</li>
 </ul>
 What are quintiles? 
-<ul><li>Quintiles group data into five categories. If our data contains 100 Census block groups, then each quintile represents 20 Census block groups. This facilitates comparison across variables: we can ask, for instance, where are the top 20% of black neighborhoods? Where are the top 20% of white neighborhoods?</li></ul>
+<ul><li>Quintiles organize data into five equal-count categories. If our data contains 100 Census block groups, then each quintile represents 20 Census block groups. This facilitates comparison across variables: we can ask, for instance, where are the top 20% of black neighborhoods? Where are the top 20% of white neighborhoods?</li></ul>
 Data sources 
-<ul><li>US Census's American Community Survey (2016 5-year survey)</li>
-	<li><a href="https://data.nola.gov/Housing-Land-Use-and-Blight/Short-Term-Rental-License-Applications/en36-xvxg" target="_blank">Data.Nola.Gov</a></li>
+<ul><li>Demographic information (reported race and ethnicity) and rent and income data come from the US Census's American Community Survey (2016 5-year)</li>
+	<li>STR licenses can be searched and downloaded here: <a href="https://data.nola.gov/Housing-Land-Use-and-Blight/Short-Term-Rental-License-Applications/en36-xvxg" target="_blank">Data.Nola.Gov</a></li>
 </ul>
 
 <hr><a href="https://github.com/ericnost/NOLA-STR/issues" target="_blank">Report an issue</a>
+<br>
 </div>
 <!-- buttons here -->
