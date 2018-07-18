@@ -1,5 +1,5 @@
 # NOLA-STR
-[ericnost.github.io/NOLA-STR/index.html](ericnost.github.io/NOLA-STR/index.html)
+[ericnost.github.io/NOLA-STR/index.html](https://ericnost.github.io/NOLA-STR/index.html)
 
 Mapping short-term rentals in New Orleans using data from the city's short-term rental licenses (current as of March 2018).
 
