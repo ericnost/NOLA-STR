@@ -1,3 +1,21 @@
+.navbar-default .navbar-toggle:hover {
+  background-color: #636363;
+
+}
+.navbar-default .navbar-brand {
+  font-family: 'PT Serif', serif;
+  font-size: 30px;
+}
+
+.navbar-default .navbar-brand:hover {
+  text-decoration: underline;
+}
+
+.navbar-default .navbar-nav > li > a  {
+  font-family: 'PT Serif', serif;
+  font-size: 20px;
+}
+
 
 h4 {
   font-size: 20px;
@@ -9,7 +27,7 @@ h5 {
 }
 
 li{
-  font-size: 14px;
+  font-size: 10px;
 }
 
 .well {
@@ -22,14 +40,6 @@ li{
   padding: 30px;
   background: #fcfcfc;;
 }
-.brand{
-  background-image: url("../wetlands_test.jpg");
-  background-repeat: repeat-y;
-  background-size:100vw
-  width:100vw;
-  color: black;
-  font-weight: 900;
-}
 
 .row{
   padding:10px;
@@ -37,7 +47,7 @@ li{
 
 body {
     background-color: #fcfcfc;
-  font-family: 'PT Serif', serif;
+    font-family: 'PT Serif', serif;
   max-width: 100%;
   overflow-x: hidden;
 }

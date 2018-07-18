@@ -31,22 +31,31 @@
        <script type="text/javascript" src="lib/ui-leaflet.js"></script>
         <script type="text/javascript" src="lib/log.js"></script>
         <script src='lib/nprogress.js'></script>
-   <link rel='stylesheet' href='css/nprogress.css'/>
-    <script src="lib/w3HTMLinclude.js"></script>
+      <link rel='stylesheet' href='css/nprogress.css'/>
+ 
+      <nav class="navbar navbar-default navbar-fixed-top main-navbar"> <!--creates navbar-->
+
+            <div class="navbar-header"> <!--creates the navbar header-->
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span><!--used for screen readers for accessibility-->
+                    <span class="glyphicon glyphicon-menu-hamburger"></span>
+                    <span class="menu">Menu</span>
+                </button> <!--hamburger button for smaller devices-->
+                <a class="navbar-brand" href="index.html">Short-Term Rentals in New Orleans</a><!--our website brand name-->
+
+            </div>
+            
+
+      </nav><!--end navigation bar-->
 
 
 </head>
 
   <body ng-app="demoapp">
 
-	<div class="brand col-md-12">
-		<div class="col-md-4 pull-right">
-			<h1><em><b>ERIC NOST</b> </em><img src="photo.png" height="50px"/></h1>
-		</div>
-		
-	</div>
+	
 <div class="col-md-12 container" id="main">
-  <h3>Short-Term Rentals in New Orleans</h3><ui-view></ui-view>
+  <br><br><br><ui-view></ui-view>
 </div>
 
 
