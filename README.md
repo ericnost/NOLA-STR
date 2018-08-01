@@ -22,3 +22,6 @@ What are quintiles?
 Data sources
 - Demographic information (reported race and ethnicity) and rent and income data come from the US Census's American Community Survey (2016 5-year)
 - STR licenses can be searched and downloaded here: Data.Nola.Gov
+
+## R files
+An R script for parsing US Census Data (ACS) and relating it to various STR data
