@@ -76,30 +76,9 @@ app.config(function($stateProvider) {
       	return Resource.getSTR()
       }
     }
-  },
-   siteState ={
-    name: 'main.site', //name of the object
-    url: '/{site}/{expressed}', //url to point to, or that causes this view to be triggered
-    component: 'site', //component that works with the data, loads the template
-    resolve: { //data to bind to our component
-      //load all years....don't need new geography
-        expressed: function($stateParams){
-          return $stateParams.expressed
-      },  
-        data2000: function(Resource, $stateParams) {
-          return Resource.getSite($stateParams.site, "2000")
-      },
-        data2010: function(Resource, $stateParams) {
-          return Resource.getSite($stateParams.site, "2010")
-      },
-        data2017: function(Resource, $stateParams) {
-          return Resource.getSite($stateParams.site, "2017")
-      }
-    }
   }
   //call the states
   $stateProvider.state(mainState); 
-  $stateProvider.state(siteState);
 })
 
 //factories make our http requests for us (including local ones) to handle data promises
@@ -121,33 +100,24 @@ app.factory('Resource', function ($http) {
       return $http.get('data/blocks.json').then(function(resp) { //"data/blocks.json"
       	return $http.get('data/income/data.json').then(function(resp3) {
 	      	return $http.get('data/race/data.json').then(function(resp2) { //how to load multiple years. probably combine in json....
-	        	var years =[2000, 2010, 2017]
+	        	var years = [2017]
 	      		var geo = topojson.feature(resp.data, resp.data.objects.blocks).features  
 	      		var data = resp2.data
 	      		var incData = resp3.data
-			      geo.forEach(function(d){ // add census data to geography
-            	d.properties.censusData ={}
-            	d.properties.incData ={}
-            	years.forEach(function(yr){
-	    		      var thisData = data.filter(function(e){return e.Id == d.properties.AFFGEOID && e.Year == yr})
-	    		      d.properties.censusData[yr] = thisData[0] ? thisData[0] : undefined
-	    		      var thisInc = incData.filter(function(e){return e.Id == d.properties.AFFGEOID})
-	    		      d.properties.incData = thisInc[0] ? thisInc[0] : undefined
-		          })
-			      })
-	          geo = geo.filter(function(d){return d.properties.censusData["2017"]}) //d.properties.censusData["2014"] && d.properties.censusData["2000"] && d.properties.censusData["2010"]&& d.properties.censusData["2015"] && 
-	        	return geo;
+			    geo.forEach(function(d){ // add census data to geography
+	            	d.properties.censusData ={}
+	            	d.properties.incData ={}
+	            	years.forEach(function(yr){
+		    		    var thisData = data.filter(function(e){return e.Id == d.properties.AFFGEOID && e.Year == yr})
+		    		    d.properties.censusData[yr] = thisData[0] ? thisData[0] : undefined
+		    		    var thisInc = incData.filter(function(e){return e.Id == d.properties.AFFGEOID})
+		    		    d.properties.incData = thisInc[0] ? thisInc[0] : undefined
+			        })
+			    })
+	          	geo = geo.filter(function(d){return d.properties.censusData["2017"]}) //d.properties.censusData["2014"] && d.properties.censusData["2000"] && d.properties.censusData["2010"]&& d.properties.censusData["2015"] && 
+	          	return geo;
 	        })
 	  	})
-      });
-    },    
-    getSite: function(site, year) { //this instead should filter geography, above, to return right id
-      return $http.get('data/race/data.json').then(function(resp) {
-        return $http.get('data/income/data.json').then(function(resp3) {
-          var data = resp.data.filter(function(d){return d.Year == year})
-          data = data.filter(function(d){return d.Id == site})
-          return data
-        })
       });
     }
   }
@@ -384,109 +354,6 @@ app.component('home', {
  NProgress.done()
  }
 });
-
-app.component('site', {
-  bindings: { data2017: '<', data2000: '<', data2010: '<', expressed: '<'}, //make the data we loaded into the view from the factory available to this component
-  templateUrl: 'site.html', //this is the html that we will plug our data into
-  controller: function () {
-
-    var expressed = this.expressed
-     this.yAxis = expressed;
-    var total = "Total"
-    //from: https://codepen.io/nickmoreton/pen/ByYZMB
-    this.w = ($(".col-md-4").width()/2)+100;
-    this.h = 100
-    
-    if (this.data2000.length > 0) {
-          var maxi = 1
-    var mini = 0
-
-    var height = this.h
-    var width = this.w
-    //var barheight = (height/yearskey.length < 15) ? 15:height/yearskey.length //(bar width)
-    var year = d3.select('.site').append("svg").attr("width", width).attr("height", height);
-    
-    var y = d3.scale.linear()
-      .domain([maxi, mini])
-      .range([10, height-10]);
-
-    var x = d3.scale.linear()
-      .domain(["2000", "2017"])
-      .range([20, width-60]);
-    
-    var data = [this.data2000[0][expressed]/this.data2000[0][total],this.data2010[0][expressed]/this.data2010[0][total],this.data2017[0][expressed]/this.data2017[0][total]]
-
-    var line = d3.svg.line()
-        .x(function(d, i) {return x(d); })
-        .y(function(d, i) {return y(data[i]); });
-
-    year.append("path")
-        .datum(["2000", "2010", "2017"])
-        .attr("class", "line")
-      //  .attr("transform", "translate(" + 10+ "," + 0 + ")")
-        .style("stroke", "black")
-        .attr("d", line);
-
-    year.selectAll(".dot")
-      .data(["2000", "2010",  "2017"])
-        .enter().append("circle")
-      .attr("class", "dot")
-     // .attr("transform", "translate(" + 10+ "," + 0 + ")")
-      .attr("cx", line.x())
-      .attr("cy", line.y())
-      .attr("r", 6)
-      .style("fill", "black")
-
-    var xAxis = d3.svg.axis()
-        .scale(x)
-        //.orient("bottom")
-        .tickValues(["2000", "2010", "2017"])
-        .tickFormat(d3.format(""))
-
-    year.append("g")
-        .attr("class", "axis")
-        .call(xAxis)
-    .selectAll("text")
-      .attr("y", height-10)
-      .attr("x", 0)
-      .style({"text-anchor": "middle", "size": "6px"});
-
-      var format = d3.format(".4r") 
-      year.selectAll("label")
-      .data(["2000", "2010", "2017"])
-      .enter().append("text")
-      .attr("y", line.y())
-      .attr("x", line.x())
-      .attr("transform", "translate(" + 10+ "," + 0 + ")")
-      .text(function(d,i){var text = format((data[i]*100))+"%"; return text})
-
-    //accordion
-    this.status = {
-	    isCustomHeaderOpen: false,
-	    isFirstOpen: true,
-	    isFirstDisabled: false
-  	};
-  	this.oneAtATime = true;
-  	this.groups = [
-      {
-        title: '2000',
-        content: this.data2000
-      },
-      {
-        title: '2010',
-        content: this.data2010
-      },
-      {
-        title: '2017',
-        content: this.data2017
-      }
-    ];
-    this.groups.reverse()
-  }
-
-  }
-})  
-
 
 </script>
 </body>
