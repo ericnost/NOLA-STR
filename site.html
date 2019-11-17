@@ -1,4 +1,4 @@
-<div><h5>Census Block Group: </h5><h4>{{$ctrl.data2016[0].Id}}</h4></div>
+<div><h5>Census Block Group: </h5><h4>{{$ctrl.data2017[0].Id}}</h4></div>
 <div><h5>Attribute: </h5><h4>% {{$ctrl.yAxis}}</h4></div>
 <div class="site">
 <!--  style="width:{{$ctrl.w}}px; height:{{$ctrl.h}}px;" > 
@@ -34,8 +34,8 @@
     <div uib-accordion-group class="panel-default" heading="{{group.title}}" ng-repeat="group in $ctrl.groups">
       <h5>Demographics</h5>
       Total population: {{group.content[0].Total}}
-      <br>White: {{group.content[0].White}}
       <br>Black or African American: {{group.content[0]['Black or African American']}}
+      <br>White: {{group.content[0].White}}
       <br>Asian: {{group.content[0].Asian}}
       <br>Hispanic: {{group.content[0].Hispanic}}
       <p><h5>Income and rent data</h5>
@@ -43,7 +43,7 @@
     </div>
   </uib-accordion><!-- 
 
-      Median contract rent: {{group.content[0]['Median contract rent 2016']}}
+      Median contract rent: {{group.content[0]['Median contract rent 2017']}}
       <br>Black or African American: {{group.content[0]['Black or African American']}}
       <br>Asian: {{group.content[0].Asian}}
       <br>Hispanic: {{group.content[0].Hispanic}}

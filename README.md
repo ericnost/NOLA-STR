@@ -6,7 +6,7 @@ Mapping short-term rentals in New Orleans using data from the city's short-term 
 See also The Lens's mapping [here](https://thelensnola.org/new-orleans-airbnb-tracker/).
 
 ## What are short-term rentals?
-This is a map of short-term rentals (STR) that have been issued permits from the City of New Orleans, permits which were active as of March 20th, 2018. STRs involve an apartment or house's long-term renter, owner, or property manager "hosting" guests. Airbnb is the most well-known website for listing and booking such rentals. While Airbnb claims that STR can help renters and owners make ends meet, affordable housing adovcates have raised concerns that STR leads to rent increases and displacement.
+This is a map of short-term rentals (STR) that have been issued permits from the City of New Orleans. STRs involve an apartment or house's long-term renter, owner, or property manager "hosting" guests. Airbnb is the most well-known website for listing and booking such rentals. While Airbnb claims that STR can help renters and owners make ends meet, affordable housing adovcates have raised concerns that STR leads to rent increases and displacement.
 
 Jane Place, a New Orleans organization working for housing justice, has released a report on the impacts of short-term rentals on the city. Some of the key findings: the vast majority of STR are whole-home rentals; some neighborhoods are more burdened by STRs than others; the STR market has consolidated into the hands of fewer operators; long-term housing market prices have increased.
 

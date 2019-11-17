@@ -1,0 +1,123 @@
+    this.update = function (sift) {
+      var pos = this.quants.indexOf(sift)
+      var values = d3.values(this.checkResults)
+      var filters = []
+      for (j=0; j<values.length; j++){
+        if(values[j]){
+          var plusOne = this.quants[j+1] ? this.quants[j+1] : 100
+          filters.push({"base": this.quants[j], "max": plusOne})
+        }
+       }
+    };
+
+
+<input type="range" name="range" ng-model="$ctrl.filterOverlayValue[$ctrl.radioModelOverlay]" min="0" max="{{$ctrl.maxOverlay[$ctrl.radioModelOverlay]}}" ng-change="$ctrl.radios(value,filterValue)">
+
+
+
+
+    function makeLegend(){
+      var obj = {
+        position: 'bottomleft',
+        colors: ['black'],
+        labels: ["min", 'max']//[ format(min)+"-"+format(range[0]), format(range[0])+"-"+format(range[1]), format(range[1])+"-"+format(max) ].reverse()
+      }
+      return obj
+    }
+
+
+
+    this.radios = function(){
+      this.markers={}
+
+      var exp = this.radioModelExpressed
+      var overlay = this.radioModelOverlay
+      var str = this.radioModelSTR
+
+      var rentIncFilter = this.filterOverlayValue[overlay]
+
+      this.showFilter.str = str == "None" ? false : true
+      this.showFilter.rentinc = overlay == "None" ? false : true
+      var temp = rentals.filter(function(d){return d["license_type"] == str}) 
+      this.strTotal = temp.length
+       
+      angular.extend(this, {
+          markers: makersMark(exp, overlay, str, rentIncFilter, temp)
+      }); //function that calls point to layer on layers
+     
+      var dump = d3.values(this.markers).filter(function(d){return d.type == "str" && d.opacity == .4})
+      this.strCount=dump.length
+
+      var format = d3.format(".4r")
+      this.percent = format((this.strCount/this.strTotal)*100)
+    }
+
+    function makersMark (exp, overlay, str, temp){
+        var obj ={}
+
+        var points = temp.map(function(c){return [parseFloat(c.location.longitude),parseFloat(c.location.latitude)]})
+        points = turf.points(points)
+
+        var thisOpacity;
+
+        function makeid() {
+          var text = "";
+          var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+          for (var i = 0; i < 5; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+            return text;
+        } //https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+        
+        //console.log(layers)
+        var x = layers.map(function(d){return d.feature.geometry.coordinates}) //return *based* on inc filters - show only STRs within constraints
+        //console.log(x)
+        var searchWithin = turf.multiPolygon(x)
+        //console.log(searchWithin)
+        var features = turf.pointsWithinPolygon(points,searchWithin).features
+        //console.log(features)
+        if (features.length > 0){
+          features.forEach(function(d){
+            var hash = makeid()
+            var key = "a"+d.geometry.coordinates[1].toString().slice(3,14)+hash
+            obj[key] = {
+              lat: d.geometry.coordinates[1],
+              lng: d.geometry.coordinates[0],
+              opacity: .4,
+              focus: false,
+              type:"str",
+              //message: "default",
+              icon:{
+                type:'div',
+                iconSize: [4, 4],
+                className: 'circle',
+              }   
+            }
+          })
+        }
+        layers.forEach(function(l){
+          var overlayCheck = (overlay == "Median household income") ? "Median household income in the past 12 months (in 2017 Inflation-adjusted dollars)" : "Median contract rent 2017"
+          if (overlay != "None" && l.feature.properties.incData[overlayCheck]<= rentIncFilter){ //change!!!!
+            if (l.options.fillOpacity > 0 || exp == "None"){thisOpacity = .4} else {thisOpacity = 0} //set marker opacity based on demo expression
+            var bounds = l.getBounds();
+            var latLng = bounds.getCenter();
+            var scale = overlayCheck == "Median household income in the past 12 months (in 2017 Inflation-adjusted dollars)" ? .0003 : .025 
+            var radius = l.feature.properties.incData[overlayCheck] * scale //30 will be largest circle size
+            var message = l.feature.properties.incData[overlayCheck].toString()
+            var measure =  "dollars"
+            obj[l.feature.properties.AFFGEOID] = {
+              lat: latLng.lat,
+              lng: latLng.lng,
+              opacity: thisOpacity,
+              focus: false,
+              message: message+" "+measure,
+              icon:{
+                type:'div',
+                iconSize: [radius, radius],
+                className: 'circle'
+              }
+            }
+          } 
+        })
+      return obj
+    }

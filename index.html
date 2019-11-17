@@ -17,20 +17,17 @@
       <link rel="stylesheet" href="css/style.css">
 
       <script type="text/javascript" src="lib/jquery-1.11.3.min.js"></script>
-       <script type="text/javascript" src="lib/bootstrap.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.js"></script>
+      <script type="text/javascript" src="lib/bootstrap.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.js"></script>
       <script type="text/javascript" src="lib/d3.js" charset="utf-8"></script>
       <script type="text/javascript" src="lib/leaflet.js"></script>
       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.js"></script>
       <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
-       <script type="text/javascript" src="lib/topojson.v1.min.js"></script>
-
-      <!--  <script type="text/javascript" src="lib/router.js"></script>-->
-       <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/1.0.0-beta.3/angular-ui-router.js"></script> 
-      
-       <script type="text/javascript" src="lib/ui-leaflet.js"></script>
-        <script type="text/javascript" src="lib/log.js"></script>
-        <script src='lib/nprogress.js'></script>
+      <script type="text/javascript" src="lib/topojson.v1.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/1.0.0-beta.3/angular-ui-router.js"></script> 
+      <script type="text/javascript" src="lib/ui-leaflet.js"></script>
+      <script type="text/javascript" src="lib/log.js"></script>
+      <script src='lib/nprogress.js'></script>
       <link rel='stylesheet' href='css/nprogress.css'/>
  
       <nav class="navbar navbar-default navbar-fixed-top main-navbar"> <!--creates navbar-->
@@ -59,9 +56,7 @@
 </div>
 
 
-
 <script>
-
 var app = angular.module("demoapp", ['ui.router', 'ui.bootstrap', 'nemLogging', 'ui-leaflet']);
 app.config(function($logProvider){
   $logProvider.debugEnabled(false);
@@ -90,21 +85,15 @@ app.config(function($stateProvider) {
       //load all years....don't need new geography
         expressed: function($stateParams){
           return $stateParams.expressed
-        },  
+      },  
         data2000: function(Resource, $stateParams) {
           return Resource.getSite($stateParams.site, "2000")
       },
-            data2010: function(Resource, $stateParams) {
+        data2010: function(Resource, $stateParams) {
           return Resource.getSite($stateParams.site, "2010")
       },
-            data2014: function(Resource, $stateParams) {
-          return Resource.getSite($stateParams.site, "2014")
-      },
-            data2015: function(Resource, $stateParams) {
-          return Resource.getSite($stateParams.site, "2015")
-      },
-            data2016: function(Resource, $stateParams) {
-          return Resource.getSite($stateParams.site, "2016")
+        data2017: function(Resource, $stateParams) {
+          return Resource.getSite($stateParams.site, "2017")
       }
     }
   }
@@ -116,38 +105,37 @@ app.config(function($stateProvider) {
 //factories make our http requests for us (including local ones) to handle data promises
 app.factory('Resource', function ($http) {
   var service = {
-    getBlocks: function() {
-      return $http.get('data/blocks.json').then(function(resp) {
-        return resp.data;
-      });
-    },
     getSTR: function(){
-    	return $http.get('data//str/str3-18.json').then(function(respSTR) {
-    		return respSTR.data.filter(function(d){return d['Current Status'] == "Issued"})
+      return $http({
+          url: 'https://data.nola.gov/resource/en36-xvxg.json?current_status=Issued&expired=No', 
+          method: "GET",
+          params: {
+            "$limit" : 10000,
+            "$$app_token": "i1gXZz9A4yRYmXeBzahmzCAYO"
+          }
+       }).then(function(respSTR){
+    		return respSTR.data;
     	})
     },
     getAll: function() {
       return $http.get('data/blocks.json').then(function(resp) { //"data/blocks.json"
       	return $http.get('data/income/data.json').then(function(resp3) {
 	      	return $http.get('data/race/data.json').then(function(resp2) { //how to load multiple years. probably combine in json....
-	        	var years =["2000", "2010", "2014", "2015", "2016"]
+	        	var years =[2000, 2010, 2017]
 	      		var geo = topojson.feature(resp.data, resp.data.objects.blocks).features  
 	      		var data = resp2.data
 	      		var incData = resp3.data
-			      geo.forEach(function(d){ // add census data to geggraohpy
-	            	d.properties.censusData ={}
-	            	d.properties.incData ={}
-	            	years.forEach(function(yr){
-	    		      var thisData = data.filter(function(e){return e.Id == d.properties.AFFGEOID && e.Year == yr}) //handle 1990 differently?
+			      geo.forEach(function(d){ // add census data to geography
+            	d.properties.censusData ={}
+            	d.properties.incData ={}
+            	years.forEach(function(yr){
+	    		      var thisData = data.filter(function(e){return e.Id == d.properties.AFFGEOID && e.Year == yr})
 	    		      d.properties.censusData[yr] = thisData[0] ? thisData[0] : undefined
 	    		      var thisInc = incData.filter(function(e){return e.Id == d.properties.AFFGEOID})
 	    		      d.properties.incData = thisInc[0] ? thisInc[0] : undefined
-			        })
-	          //d.properties.data.fill = choropleth(d) //bind color changing event somewhere
+		          })
 			      })
-
-	          	geo = geo.filter(function(d){return d.properties.censusData["2016"]}) //d.properties.censusData["2014"] && d.properties.censusData["2000"] && d.properties.censusData["2010"]&& d.properties.censusData["2015"] && 
-
+	          geo = geo.filter(function(d){return d.properties.censusData["2017"]}) //d.properties.censusData["2014"] && d.properties.censusData["2000"] && d.properties.censusData["2010"]&& d.properties.censusData["2015"] && 
 	        	return geo;
 	        })
 	  	})
@@ -158,9 +146,7 @@ app.factory('Resource', function ($http) {
         return $http.get('data/income/data.json').then(function(resp3) {
           var data = resp.data.filter(function(d){return d.Year == year})
           data = data.filter(function(d){return d.Id == site})
-          //racedata=data
-          //data=resp3.data
-          return data//, racedata;
+          return data
         })
       });
     }
@@ -172,311 +158,235 @@ app.component('home', {
   bindings: { geography: '<', str: '<'}, //make the data we loaded into the view from the factory available to this component
   templateUrl: 'map.html', //this is the html that we will plug our data into
   controller: function ($filter) {
-     NProgress.start()
+    NProgress.start()
 
-    this.radioModelYear = "2016"
-    var year ="2016"
+    this.radioModelYear = "2017"
     this.radioModelOverlay="None"
    
-   var dump = this.geography
-    this.filterOverlayValue={}
-    this.filterOverlayValue["Median household income"] = d3.max(dump.map(function(d){return d.properties.incData["Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)"]}))
-    this.maxOverlay={}
-    this.maxOverlay["Median household income"] = d3.max(dump.map(function(d){return d.properties.incData["Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)"]}))
-    this.filterOverlayValue["Median rent"] = d3.max(dump.map(function(d){return d.properties.incData["Median contract rent 2016"]}))
-    this.maxOverlay["Median rent"] = d3.max(dump.map(function(d){return d.properties.incData["Median contract rent 2016"]}))
-
     var rentals = this.str
-    this.maxGuests = d3.max(rentals.map(function(d){return d["Guest Occupancy Limit"]}))
-    this.filterValue = d3.max(rentals.map(function(d){return d["Guest Occupancy Limit"]}))
     this.radioModelSTR = "None"
 
-    this.activeMarker = "None"
-    var expressed = "None"
-    var go = ""
+    //var go = ""
     this.radioModelExpressed="None"
     
     this.strCount = 0
     this.strTotal = 0
     this.percent = 0
     this.blockGroupCount = 0
-
-    this.currentFeature
     
     this.checkResults = {0:true, 1:true, 2:true, 3:true, 4: true}
 
-    this.showFilter = {"str": false, "exp": false, "rentinc": false}
+    this.showFilter = {"exp": false, "rentinc": false}
     
-    this.update = function (sift) {
-        var yr = this.radioModelYear
-       var pos = this.quants.indexOf(sift)
-       var values = d3.values(this.checkResults)
-       var filters = []
-       for (j=0; j<values.length; j++){
-        if(values[j]){
-          var plusOne = this.quants[j+1] ? this.quants[j+1] : 100
-          filters.push({"base": this.quants[j], "max": plusOne})
-        }
-       }
-
-    };
-
-  	var scheme = {"White": ['#edf8e9','#bae4b3','#74c476','#31a354','#006d2c'], "Black or African American": ['#eff3ff','#bdd7e7','#6baed6','#3182bd','#08519c'], "American Indian or Alaska Native": ['#feedde','#fdbe85','#fd8d3c','#e6550d','#a63603'], "Asian": ['#f2f0f7','#cbc9e2','#9e9ac8','#756bb1','#54278f'], "Native Hawaiian and Other Pacific Islander": ['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15'], "Hispanic": ['#f7f7f7','#cccccc','#969696','#636363','#252525']}
+  	var scheme = {"White": ['#edf8e9','#bae4b3','#74c476','#31a354','#006d2c'], "Black or African American": ['#eff3ff','#bdd7e7','#6baed6','#3182bd','#08519c'], "Asian": ['#f2f0f7','#cbc9e2','#9e9ac8','#756bb1','#54278f'], "Hispanic": ['#f7f7f7','#cccccc','#969696','#636363','#252525']}
     var textColor = ["#000000", "#333333", "#e5e5e5", "#e5e5e5", "#e5e5e5"]
-	  var range, color, value, opacity
 	  
     function style(d){
       return {
-                    fillColor: 'white',
-                    weight: 0,
-                    //opacity: opacity,
-                    color: 'white',
-                    dashArray: '0',
-                    fillOpacity: 0
-                }
+        fillColor: 'white',
+        weight: 0,
+        color: 'white',
+        dashArray: '0',
+        fillOpacity: 0
+      }
     };
 
-     var layers = [];
+    var layers = [];
 
-    this.reExpress = function (){ 
+    var color = d3.scale.quantile(); //designate quantile scale generator
 
-      expressed = this.radioModelExpressed
+    var format = d3.format(".4r")
 
-       window.location = "#/"+go+"/"+expressed
+    this.reExpress = function (value){ 
+      var expressed = this.radioModelExpressed
+      var overlayed = this.radioModelOverlay
+      var str = this.radioModelSTR
+      
+      if (expressed != "None") {this.showFilter.exp = true}
+      if (overlayed != "None") {this.showFilter.rentinc = true}
 
-      if (expressed == "None"){
-        this.showFilter.exp = false
-        layers.forEach(function(d){
-          d.setStyle({  
-                fillColor: 'white',
-                weight: 0,
-                //opacity: opacity,
-                color: 'white',
-                dashArray: '0',
-                fillOpacity: 0
-              });
+      if (str=="None"){
+        this.radioModelSTR==false
+        angular.extend(this, {
+          markers: null
         })
-      }  else{
-        this.showFilter.exp = true
-        var year = this.radioModelYear
-        var temp = this.geography.filter(function(d){return d.properties.censusData[year]})
-        domArray = temp.map(function(d){var value = d.properties.censusData[year][expressed]/d.properties.censusData[year]["Total"]; return value})
-        range = scheme[expressed]
-        color = d3.scale.quantile() //designate quantile scale generator
-          .range(range)
-        d3.mean(domArray) > .3 ? color.domain(domArray) : color.domain([d3.min(domArray), d3.max(domArray)]);
-        //this.quants = color.quantiles()
-        angular.extend(this, {quants: color.copy().quantiles(), ranger: {fill:range, text:textColor}})
-        this.quants.splice(0,0,0)
-       //this.ranger = {fill:range, text: textColor}
-
-        var yr = this.radioModelYear
-        var values = d3.values(this.checkResults)
-        var filters = []
-        for (j=0; j<values.length; j++){
-          if(values[j]){
-            var plusOne = this.quants[j+1] ? this.quants[j+1] : 100
-            filters.push({"base": this.quants[j], "max": plusOne})
-          }
-         }
-
-         var items = this.geography
-         var allItems=[];
-          //for (i=0; i<filters.length; i++){
-            //find neighborhoods higher than this
-        filters.forEach(function(obj){
-          var temp = items.filter(function(item){
-          //if item price is included between the two boundaries we return true
-          return item.properties.censusData[year][expressed]/item.properties.censusData[year]["Total"] > obj.base && item.properties.censusData[year][expressed]/item.properties.censusData[year]["Total"] < obj.max
-          
-            
-          });
-          temp.forEach(function(t){
-            allItems.push(t)
-          })
-        })
-
-      this.blockGroupCount = allItems.length
-
-       layers.forEach(function(d){
-       	var value = d.feature.properties.censusData[year] ? color(d.feature.properties.censusData[year][expressed]/d.feature.properties.censusData[year]["Total"]) : "#ddd";
-       	
-        var box = allItems.filter(function(e){return d.feature.properties.AFFGEOID == e.properties.AFFGEOID}) //is the layer part of allItems (the items we're keeping)?
-          var opacity =  box.length > 0 ? .7 : 0 
-          
-        d.setStyle({	
-   					fillColor: value,
-                      weight: 2,
-                     // opacity: opacity,
-                      color: 'white',
-                      dashArray: '3',
-                      fillOpacity: opacity
-                      });
-        })
-      this.radios()
-      // if (this.activeMarker == "str"){this.doSTRRexpress()}
-      //if (this.activeMarker == "overlays"){this.doMarkersRexpress()}
-
       }
-    //NProgress.done()
-    }
+      if (expressed == "None"){this.showFilter.exp = false} 
+      if (overlayed == "None"){
+        this.showFilter.rentinc = false
+        angular.extend(this, {
+          markers: null
+        })
+      } 
+ 
+        var theseItems=[]; //rent /income based var items = this.geography //layers
+        if (overlayed != "None"){
+          overlayed = (overlayed == "Median household income") ? "Median household income in the past 12 months (in 2017 Inflation-adjusted dollars)" : "Median contract rent 2017"
+          var domArray = layers.map(function(d){var value = d.feature.properties.incData[overlayed]; return value})
+          var scaled = d3.scale.quantile().domain(domArray).range([0,1,2,3,4])
+          angular.extend(this, {equants: scaled.copy().quantiles()})
+          this.equants.splice(0,0,0)
 
-
-    angular.extend(this, {
-    	markers: null
-    })
-        
-        this.radios = function(clicked){
-          this.markers = {}
-
-          var exp = this.radioModelExpressed
-          var overlay = this.radioModelOverlay
-          var str = this.radioModelSTR
-
-          var guestsFilter = this.filterValue
-          var rentIncFilter = this.filterOverlayValue[overlay]
-
-          this.showFilter.str = str == "None" ? false : true
-          this.showFilter.rentinc = overlay == "None" ? false : true
-
-          var temp = rentals.filter(function(d){return d["License Type"] == str}) //clicked == "All" ? rentals : 
-          this.strTotal = temp.length
-          temp = temp.filter(function(d){return d['Guest Occupancy Limit'] <= guestsFilter})
-          
-          angular.extend(this, {
-                    markers: makersMark(clicked, exp, overlay, str, guestsFilter, rentIncFilter,temp)//function that calls point to layer on layers
-                });
-         
-          var dump = d3.values(this.markers).filter(function(d){return d.type == "str" && d.opacity == .4})
-          this.strCount=dump.length
-          var format = d3.format(".4r")
-          this.percent = format((this.strCount/this.strTotal)*100)
-        }
-
-
-        function makersMark (clicked, exp, overlay, str, guestsFilter, rentIncFilter,temp){
-            var obj ={}
-
-            var points = temp.map(function(c){return [c.Y, c.X]})
-            points = turf.points(points)
-
-            var thisOpacity
-
-            function makeid() {
-              var text = "";
-              var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-              for (var i = 0; i < 5; i++)
-                text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-              return text;
-            } //https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
-
-            layers.forEach(function(l){
-              var overlayCheck = (overlay == "Median household income") ? "Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)" : "Median contract rent 2016"
-              if (overlay != "None" && l.feature.properties.incData[overlayCheck]<= rentIncFilter){
-
-                if (l.options.fillOpacity > 0|| exp == "None"){thisOpacity = .4}else{thisOpacity = 0} //set marker opacity based on demo expression
-                var bounds = l.getBounds();
-                var latLng = bounds.getCenter();
-                var scale = overlayCheck == "Median household income in the past 12 months (in 2016 Inflation-adjusted dollars)" ? .0003 : .025 
-                var radius = l.feature.properties.incData[overlayCheck] * scale //30 will be largest circle size
-                var message = l.feature.properties.incData[overlayCheck].toString()
-                var measure =  "dollars" //(clicked == "with other types of income" || clicked == "with public assistance income") ? "percent" :
-                //var max = l.feature.properties.incData[clicked]
-                  obj[l.feature.properties.AFFGEOID] = {
-                    lat: latLng.lat,
-                    lng: latLng.lng,
-                    opacity: thisOpacity,
-                    focus: false,
-                    message: message+" "+measure,
-                    icon:{
-                      type:'div',
-                      iconSize: [radius, radius],
-                      className: 'circle'
-                    }
-                  }
-                }
-                
-                if (str != "None"){
-                    var searchWithin = turf.polygon(l.feature.geometry.coordinates)
-                    var features = turf.pointsWithinPolygon(points, searchWithin).features //what points are in this polygon/block group?
-                
-                    if (features.length > 0){
-                      features.forEach(function(d){
-                        var hash = makeid()
-                        var key = "a"+d.geometry.coordinates[1].toString().slice(3,14)+hash
-
-                        if (l.options.fillOpacity > 0 || exp == "None"){thisOpacity = .4}else{thisOpacity = 0}
-                        //var message = "Address: "+d.Address+"<br>Guest limit: "+d["Guest Occupancy Limit"]+"<br><a href='"+d.Link+"' target='_blank''>Link to permit</a><br>"
-                        //var target = "a"+d.X.toString().slice(3,12)
-                        obj[key] = {
-                          lat: d.geometry.coordinates[1],
-                          lng: d.geometry.coordinates[0],
-                          opacity: thisOpacity,
-                          focus: false,
-                          type:"str",
-                          //message: "default",
-                          icon:{
-                            type:'div',
-                            iconSize: [4, 4],
-                            className: 'circle',
-                            }   
-                        }
-                      })
-                    }
-                }
+          var values = d3.values(this.checkResults)
+          var filters = []
+          for (j=0; j<values.length; j++){
+            if(values[j]){
+              var plusOne = this.equants[j+1] ? this.equants[j+1] : d3.max(domArray)
+              filters.push({"base": this.equants[j], "max": plusOne})
+            }
+          }
+          filters.forEach(function(obj){
+            var temp = layers.filter(function(item){
+            //if rent/income is included between the two boundaries we return true
+              return item.feature.properties.incData[overlayed] > obj.base && item.feature.properties.incData[overlayed] <= obj.max
+            });
+            temp.forEach(function(t){
+              theseItems.push(t)
             })
-            return obj
-
-    }
-
-    angular.extend(this, {
-            geojson: {
-                data: this.geography,
-                style:style, 
-                onEachFeature: function(feature, layer){
-                  layers.splice(0,0,layer);
-                  layer.on("click", function() {
-                    go = feature.properties.AFFGEOID
-                    layers.forEach(function(d){
-                      d.setStyle({
-                        color:'white'
-                      })
-                    })
-                    layer.setStyle({
-                      color: 'red'
-                    })
-                    window.location = "#/"+feature.properties.AFFGEOID+"/"+expressed
-                    
-                  });
-                  
-                }
-            },
-            center: {
-                lat: 29.977835,
-                lng: -90,
-                zoom: 12
-            },
-            defaults: {
-                scrollWheelZoom: false
-            }//,legend: {main: makeLegend()}
-    });
-    function makeLegend(){
-      var obj = {
-              position: 'bottomleft',
-              colors: ['black'],
-              labels: ["min", 'max']//[ format(min)+"-"+format(range[0]), format(range[0])+"-"+format(range[1]), format(range[1])+"-"+format(max) ].reverse()
+          })
+        } else {
+          theseItems = layers
         }
-      return obj
+        this.blockGroupCount = theseItems.length
+
+        //use the area of the filtered block groups to constrain markers
+        var obj = {}
+
+        var temp = rentals.filter(function(d){return d["license_type"] == str})
+        this.strTotal = temp.length
+        var points = temp.map(function(c){return [parseFloat(c.location.longitude),parseFloat(c.location.latitude)]})
+        points = turf.points(points)
+
+        var temp = theseItems.map(function(d){return d.feature.geometry.coordinates})
+        var searchWithin = turf.multiPolygon(temp)
+        var features = turf.pointsWithinPolygon(points,searchWithin).features
+
+        function makeid() {
+          var text = "";
+          var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+          for (var i = 0; i < 5; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+            return text;
+        } //https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+
+        if (features.length > 0){
+          features.forEach(function(d){
+            var hash = makeid()
+            var key = "a"+d.geometry.coordinates[1].toString().slice(3,14)+hash
+            obj[key] = {
+              lat: d.geometry.coordinates[1],
+              lng: d.geometry.coordinates[0],
+              opacity: .4,
+              focus: false,
+              type:"str",
+              message: "STR",
+              icon:{
+                type:'div',
+                iconSize: [4, 4],
+                className: 'circle',
+              }   
+            }
+          })
+        }
+
+        if (expressed != "None"){
+          var domArray = layers.map(function(d){var value = d.feature.properties.censusData["2017"][expressed]/d.feature.properties.censusData["2017"]["Total"]; return value})
+          range = scheme[expressed]
+          color.range(range)
+          d3.mean(domArray) > .3 ? color.domain(domArray) : color.domain([d3.min(domArray), d3.max(domArray)]);
+          angular.extend(this, {quants: color.copy().quantiles(), ranger: {fill:range, text:textColor}})
+          this.quants.splice(0,0,0)
+        }
+
+        layers.forEach(function(d){ //for each of our layers, check if they are in filter, if so, color and marker
+          var box = theseItems.filter(function(e){return d.feature.properties.AFFGEOID == e.feature.properties.AFFGEOID}) //is the layer part of allItems (the items we're keeping)?
+          var opacity =  box.length > 0 ? .7 : 0 
+         	var value = d.feature.properties.censusData["2017"] ? color(d.feature.properties.censusData["2017"][expressed]/d.feature.properties.censusData["2017"]["Total"]) : "#ddd";
+          opacity = (expressed != "None") ? opacity : 0 // same with dash array
+          var message = format(((d.feature.properties.censusData["2017"][expressed]/d.feature.properties.censusData["2017"]["Total"])*100)).toString()
+          //var message2 = format(((d.feature.properties.censusData["2010"][expressed]/d.feature.properties.censusData["2010"]["Total"])*100)).toString()
+          //var message3 = format(((d.feature.properties.censusData["2000"][expressed]/d.feature.properties.censusData["2000"]["Total"])*100)).toString()
+          if (expressed != "None"){d.bindPopup("<div>2017: "+message+"% "+expressed+"</div>")}//<div>2010: "+message+"% </div><div>2000: "+message+"%</div>")};
+          d.setStyle({	
+   					fillColor: value,
+            weight: 2,
+            color: 'white',
+            dashArray: 3,
+            fillOpacity: opacity,
+            opacity: opacity
+          });
+          if (overlayed != "None"){
+            var bounds = d.getBounds();
+            var latLng = bounds.getCenter();
+            var scaler = overlayed == "Median household income in the past 12 months (in 2017 Inflation-adjusted dollars)" ? .0003 : .025 
+            var radius = d.feature.properties.incData[overlayed] * scaler //30 will be largest circle size
+            var message = d.feature.properties.incData[overlayed].toString()
+            var measure =  "dollars"
+            var opacity =  box.length > 0 ? .4 : 0
+            var click = opacity > 0 ? true : false
+            obj[d.feature.properties.AFFGEOID] = {
+              lat: latLng.lat,
+              lng: latLng.lng,
+              opacity: opacity,
+              focus: false,
+              message: overlayed + ": " + message + " " + measure,
+              icon:{
+                type:'div',
+                iconSize: [radius, radius],
+                className: 'circle'
+              },
+              clickable: click
+            }
+          } 
+        })
+
+        angular.extend(this, {
+          markers: obj
+        }); //function that calls point to layer on layers
+        
+        var dump = d3.values(this.markers).filter(function(d){return d.type == "str" && d.opacity == .4})
+        this.strCount=dump.length
+        this.percent = format((this.strCount/this.strTotal)*100) 
     }
+
+    //default/main load
+    angular.extend(this, {
+      geojson: {
+        data: this.geography,
+        style:style, 
+        onEachFeature: function(feature, layer){
+          layers.splice(0,0,layer);
+          layer.on("click", function() {
+            //go = feature.properties.AFFGEOID
+            layers.forEach(function(d){
+              d.setStyle({
+                color:'white'
+              })
+            })
+            layer.setStyle({
+              color: 'red'
+            })
+            //window.location = "#/"+feature.properties.AFFGEOID+"/"+expressed
+          });
+        }
+      },
+      center: {
+          lat: 29.977835,
+          lng: -90,
+          zoom: 12
+      },
+      defaults: {
+        scrollWheelZoom: false,
+        tileLayer: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+      }
+    });
 
  NProgress.done()
-  }
-})
+ }
+});
 
 app.component('site', {
-  bindings: { data2014: '<', data2015: '<', data2016: '<', data2000: '<', data2010: '<', expressed: '<'}, //make the data we loaded into the view from the factory available to this component
+  bindings: { data2017: '<', data2000: '<', data2010: '<', expressed: '<'}, //make the data we loaded into the view from the factory available to this component
   templateUrl: 'site.html', //this is the html that we will plug our data into
   controller: function () {
 
@@ -501,24 +411,24 @@ app.component('site', {
       .range([10, height-10]);
 
     var x = d3.scale.linear()
-      .domain(["2000", "2016"])
+      .domain(["2000", "2017"])
       .range([20, width-60]);
     
-    var data = [this.data2000[0][expressed]/this.data2000[0][total],this.data2010[0][expressed]/this.data2010[0][total],this.data2016[0][expressed]/this.data2016[0][total]]
+    var data = [this.data2000[0][expressed]/this.data2000[0][total],this.data2010[0][expressed]/this.data2010[0][total],this.data2017[0][expressed]/this.data2017[0][total]]
 
     var line = d3.svg.line()
         .x(function(d, i) {return x(d); })
         .y(function(d, i) {return y(data[i]); });
 
     year.append("path")
-        .datum(["2000", "2010", "2016"])
+        .datum(["2000", "2010", "2017"])
         .attr("class", "line")
       //  .attr("transform", "translate(" + 10+ "," + 0 + ")")
         .style("stroke", "black")
         .attr("d", line);
 
     year.selectAll(".dot")
-      .data(["2000", "2010",  "2016"])
+      .data(["2000", "2010",  "2017"])
         .enter().append("circle")
       .attr("class", "dot")
      // .attr("transform", "translate(" + 10+ "," + 0 + ")")
@@ -530,7 +440,7 @@ app.component('site', {
     var xAxis = d3.svg.axis()
         .scale(x)
         //.orient("bottom")
-        .tickValues(["2000", "2010", "2016"])
+        .tickValues(["2000", "2010", "2017"])
         .tickFormat(d3.format(""))
 
     year.append("g")
@@ -543,7 +453,7 @@ app.component('site', {
 
       var format = d3.format(".4r") 
       year.selectAll("label")
-      .data(["2000", "2010", "2016"])
+      .data(["2000", "2010", "2017"])
       .enter().append("text")
       .attr("y", line.y())
       .attr("x", line.x())
@@ -567,16 +477,8 @@ app.component('site', {
         content: this.data2010
       },
       {
-        title: '2014',
-        content: this.data2014
-      },
-      {
-        title: '2015',
-        content: this.data2015
-      },
-      {
-        title: '2016',
-        content: this.data2016
+        title: '2017',
+        content: this.data2017
       }
     ];
     this.groups.reverse()
